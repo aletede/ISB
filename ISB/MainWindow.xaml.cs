@@ -35,7 +35,6 @@ namespace ISB
                         Application.Current.Shutdown();
                 else
                     Application.Current.Shutdown();
-                // if res = null => write on the log file something
             }
             else InitializeComponent();
             this.Loaded += new RoutedEventHandler(LoadInitValueComponent);
@@ -56,19 +55,68 @@ namespace ISB
         {
             // eccezioni non gestite, dimensione in bytes
             pathTextBox.Text = Properties.Settings.Default.directory;
-            foreach (string d in Directory.GetDirectories(pathTextBox.Text))
+            try
             {
-                DirectoryInfo di = new DirectoryInfo(d);
-                DirectoryEntry de = new DirectoryEntry(di.Name, di.FullName, null, di.LastWriteTime, EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
-                localEntries.Add(de);
+                foreach (string d in Directory.GetDirectories(pathTextBox.Text))
+                {
+                    DirectoryInfo di = new DirectoryInfo(d);
+                    DirectoryEntry de = new DirectoryEntry(di.Name, di.FullName, null, di.LastWriteTime, EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
+                    localEntries.Add(de);
+
+                }
+                foreach (string f in Directory.GetFiles(pathTextBox.Text))
+                {
+                    FileInfo fi = new FileInfo(f);
+                    DirectoryEntry de = new DirectoryEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime, EntryType.File, new Uri("pack://application:,,,/images/File.png"));
+                    localEntries.Add(de);
+                }
+                localDir.ItemsSource = localEntries;
             }
-            foreach (string f in Directory.GetFiles(pathTextBox.Text))
+            catch (Exception err)
             {
-                FileInfo fi = new FileInfo(f);
-                DirectoryEntry de = new DirectoryEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime, EntryType.File, new Uri("pack://application:,,,/images/File.png"));
-                localEntries.Add(de);
+                // write in a log file
             }
-            localDir.ItemsSource = localEntries;
+        }
+
+        private void Row_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // ottimizzare il codice, pezzi di codici uguali a LoadInitvalueComponent
+            DataGridRow row = sender as DataGridRow;
+            DirectoryEntry entry = row.DataContext as DirectoryEntry;
+            if (entry.Type == EntryType.Cartella)
+            {
+                localEntries.Clear();
+                try
+                {
+                    if (entry.Fullpath != pathTextBox.Text)
+                    {
+                        DirectoryInfo di = new DirectoryInfo(entry.Fullpath);
+                        DirectoryEntry de = new DirectoryEntry("...", di.Parent.FullName, null, null, EntryType.Cartella, new Uri("pack://application:,,,/images/OpenFolder.png"));
+                        localEntries.Add(de);
+                    }
+
+                    foreach (string d in Directory.GetDirectories(entry.Fullpath))
+                    {
+                        DirectoryInfo di = new DirectoryInfo(d);
+                        DirectoryEntry de = new DirectoryEntry(di.Name, di.FullName, null, di.LastWriteTime, EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
+                        localEntries.Add(de);
+
+                    }
+                    foreach (string f in Directory.GetFiles(entry.Fullpath))
+                    {
+                        FileInfo fi = new FileInfo(f);
+                        DirectoryEntry de = new DirectoryEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime, EntryType.File, new Uri("pack://application:,,,/images/File.png"));
+                        localEntries.Add(de);
+                    }
+                    localDir.ItemsSource = null;
+                    localDir.ItemsSource = localEntries;
+                    
+                }
+                catch (Exception err)
+                {
+                    // write in a log file
+                }
+            }
         }
     }
 }

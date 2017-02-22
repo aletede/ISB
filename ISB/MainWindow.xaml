@@ -45,7 +45,12 @@
                     <DataGridTextColumn Header="Dim" Binding="{Binding Size}" Width="*"/>
                     <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="*"/>
                     <DataGridTextColumn Header="Modificato" Binding="{Binding Date}" Width="2*"/>
-                </DataGrid.Columns>                
+                </DataGrid.Columns>   
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick" />
+                    </Style>
+                </DataGrid.Resources>
             </DataGrid>
             
             <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFA0A0A0"/>
