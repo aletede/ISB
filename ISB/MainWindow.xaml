@@ -29,9 +29,34 @@
                 <ColumnDefinition Width="2"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" FontSize="55" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White">Left side</TextBlock>
+            
+            <DataGrid Grid.Column="0" Name="localDir" AutoGenerateColumns="False" Margin="10" GridLinesVisibility="None">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Nome" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding Path=Image}"/>
+                                    <TextBlock Text="{Binding Name}" Margin="5,0,0,0" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Dim" Binding="{Binding Size}" Width="*"/>
+                    <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="*"/>
+                    <DataGridTextColumn Header="Modificato" Binding="{Binding Date}" Width="2*"/>
+                </DataGrid.Columns>                
+            </DataGrid>
+            
             <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFA0A0A0"/>
-            <TextBlock Grid.Column="2" FontSize="55" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap">Right side</TextBlock>
+
+            <DataGrid Grid.Column="2" Name="remoteDir" AutoGenerateColumns="False" Margin="10" GridLinesVisibility="None">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nome" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Modificato" Binding="{Binding Date}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            
         </Grid>
         <Grid Grid.Row="2">
             <GroupBox Header="Event log" Margin="10" Foreground="White" FontSize="14">

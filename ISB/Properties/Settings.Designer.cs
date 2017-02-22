@@ -70,5 +70,53 @@ namespace ISB.Properties {
                 this["frequency"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string newDir {
+            get {
+                return ((string)(this["newDir"]));
+            }
+            set {
+                this["newDir"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string newIP {
+            get {
+                return ((string)(this["newIP"]));
+            }
+            set {
+                this["newIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9000")]
+        public ushort newPort {
+            get {
+                return ((ushort)(this["newPort"]));
+            }
+            set {
+                this["newPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public uint newFreq {
+            get {
+                return ((uint)(this["newFreq"]));
+            }
+            set {
+                this["newFreq"] = value;
+            }
+        }
     }
 }

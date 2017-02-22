@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,8 +38,10 @@ namespace ISB
                 // if res = null => write on the log file something
             }
             else InitializeComponent();
-            pathTextBox.Text = Properties.Settings.Default.directory;
+            this.Loaded += new RoutedEventHandler(LoadInitValueComponent);
         }
+
+        List<DirectoryEntry> localEntries = new List<DirectoryEntry>();
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
@@ -45,7 +49,26 @@ namespace ISB
             bool? res = settingWin.ShowDialog();    // possible exception InvalidOperationException
             if (res.HasValue)
                 if ((bool)res)
-                    MessageBox.Show("I nuovi parametri settati saranno applicati al riavvio dell'applicazione.");
+                    MessageBox.Show("I nuovi parametri saranno applicati al riavvio dell'applicazione.");
+        }
+
+        private void LoadInitValueComponent(object sender, RoutedEventArgs e)
+        {
+            // eccezioni non gestite, dimensione in bytes
+            pathTextBox.Text = Properties.Settings.Default.directory;
+            foreach (string d in Directory.GetDirectories(pathTextBox.Text))
+            {
+                DirectoryInfo di = new DirectoryInfo(d);
+                DirectoryEntry de = new DirectoryEntry(di.Name, di.FullName, null, di.LastWriteTime, EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
+                localEntries.Add(de);
+            }
+            foreach (string f in Directory.GetFiles(pathTextBox.Text))
+            {
+                FileInfo fi = new FileInfo(f);
+                DirectoryEntry de = new DirectoryEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime, EntryType.File, new Uri("pack://application:,,,/images/File.png"));
+                localEntries.Add(de);
+            }
+            localDir.ItemsSource = localEntries;
         }
     }
 }

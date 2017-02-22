@@ -30,33 +30,60 @@ namespace ISB
 
         private void LoadSettingValues()
         {
-            pathTextBox.Text = Properties.Settings.Default.directory;
-            addrTextBox.Text = Properties.Settings.Default.serverIP;
-            portTextBox.Text = Properties.Settings.Default.serverPort.ToString();
-            freqTextBox.Text = Properties.Settings.Default.frequency.ToString();
+            pathTextBox.Text = Properties.Settings.Default.newDir;  
+            addrTextBox.Text = Properties.Settings.Default.newIP;
+            portTextBox.Text = Properties.Settings.Default.newPort.ToString();
+            freqTextBox.Text = Properties.Settings.Default.newFreq.ToString();
+            pathTextBox.Tag = pathTextBox.Text;
+            addrTextBox.Tag = addrTextBox.Text;
+            portTextBox.Tag = portTextBox.Text;
+            freqTextBox.Tag = freqTextBox.Text;
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
             UInt16 port;
             UInt32 freq;
-            if (String.IsNullOrEmpty(pathTextBox.Text) || !Directory.Exists(pathTextBox.Text))
+            bool textChanged = false;
+
+            if (String.IsNullOrEmpty(pathTextBox.Text) || !Directory.Exists(pathTextBox.Text)) {
                 pathTextBox.BorderBrush = Brushes.Red;
-            else if(String.IsNullOrEmpty(addrTextBox.Text) || !isValidIPv4(addrTextBox.Text))
-                addrTextBox.BorderBrush = Brushes.Red;
-            else if (String.IsNullOrEmpty(portTextBox.Text) || !UInt16.TryParse(portTextBox.Text, out port))
-                portTextBox.BorderBrush = Brushes.Red;
-            else if (String.IsNullOrEmpty(freqTextBox.Text) || !UInt32.TryParse(freqTextBox.Text, out freq))
-                portTextBox.BorderBrush = Brushes.Red;
-            else
-            {
-                // rivedere questa parte e il caso in cui non sono state eseguite modifiche
-                Properties.Settings.Default.directory = pathTextBox.Text;
-                Properties.Settings.Default.serverIP = addrTextBox.Text;
-                Properties.Settings.Default.serverPort = port;
-                Properties.Settings.Default.frequency = freq;
-                this.DialogResult = true;   // possible execption (System.InvalidOperationException)
+                return;
             }
+            else if (pathTextBox.Text != (string)pathTextBox.Tag) {
+                textChanged = true;
+                Properties.Settings.Default.newDir = pathTextBox.Text;
+            }
+
+            if (String.IsNullOrEmpty(addrTextBox.Text) || !isValidIPv4(addrTextBox.Text)) {
+                addrTextBox.BorderBrush = Brushes.Red;
+                return;
+            }
+            else if (addrTextBox.Text != (string)addrTextBox.Tag) {
+                textChanged = true;
+                Properties.Settings.Default.newIP = addrTextBox.Text;
+            }
+
+            if (String.IsNullOrEmpty(portTextBox.Text) || !UInt16.TryParse(portTextBox.Text, out port)) {
+                portTextBox.BorderBrush = Brushes.Red;
+                return;
+            }
+            else if (portTextBox.Text != (string)portTextBox.Tag) {
+                textChanged = true;
+                Properties.Settings.Default.newPort = port;
+            }
+
+            if (String.IsNullOrEmpty(freqTextBox.Text) || !UInt32.TryParse(freqTextBox.Text, out freq)) {
+                freqTextBox.BorderBrush = Brushes.Red;
+                return;
+            }
+            else if (freqTextBox.Text != (string)freqTextBox.Tag){
+                textChanged = true;
+                Properties.Settings.Default.newFreq = freq;
+            }
+
+            if (textChanged) this.DialogResult = true;   // possible execption (System.InvalidOperationException)
+            else this.DialogResult = false; // possible execption (System.InvalidOperationException)
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
