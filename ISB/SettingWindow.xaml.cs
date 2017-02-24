@@ -82,7 +82,11 @@ namespace ISB
                 Properties.Settings.Default.newFreq = freq;
             }
 
-            if (textChanged) this.DialogResult = true;   // possible execption (System.InvalidOperationException)
+            if (textChanged)
+            {
+                Properties.Settings.Default.Save();
+                this.DialogResult = true;   // possible execption (System.InvalidOperationException)
+            }
             else this.DialogResult = false; // possible execption (System.InvalidOperationException)
         }
 

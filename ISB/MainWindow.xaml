@@ -7,8 +7,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition />
-            <RowDefinition Height="120"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="130"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.Background>
@@ -23,49 +23,61 @@
                 <Button Content="Impostazioni" Click="Settings_Click" Margin="10,5,10,10" FontSize="12"/>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" Margin="0,10">
+        <Grid Grid.Row="1" Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-            <DataGrid Grid.Column="0" Name="localDir" AutoGenerateColumns="False" Margin="10" GridLinesVisibility="None">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Nome" Width="2*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Path=Image}"/>
-                                    <TextBlock Text="{Binding Name}" Margin="5,0,0,0" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Dim" Binding="{Binding Size}" Width="*"/>
-                    <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="*"/>
-                    <DataGridTextColumn Header="Modificato" Binding="{Binding Date}" Width="2*"/>
-                </DataGrid.Columns>   
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridRow">
-                        <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick" />
-                    </Style>
-                </DataGrid.Resources>
-            </DataGrid>
+            <GroupBox Grid.Column="0" Header="Computer Locale" Margin="10" Foreground="White" FontSize="13">
+                <DataGrid Name="localDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Nome">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="{Binding Path=Image}"/>
+                                        <TextBlock Text="{Binding Name}" Margin="5,0,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Dim" Binding="{Binding Size}"/>
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding Type}"/>
+                        <DataGridTextColumn Header="Modificato" Binding="{Binding Date}"/>
+                    </DataGrid.Columns>   
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick" />
+                        </Style>
+                    </DataGrid.Resources>
+                </DataGrid>
+            </GroupBox>
             
             <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFA0A0A0"/>
 
-            <DataGrid Grid.Column="2" Name="remoteDir" AutoGenerateColumns="False" Margin="10" GridLinesVisibility="None">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Nome" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="Modificato" Binding="{Binding Date}" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            
+            <GroupBox Grid.Column="2" Header="Server Remoto" Margin="10" Foreground="White" FontSize="13">
+                <DataGrid Name="remoteDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="Modificato" Binding="{Binding Date}"/>
+                    </DataGrid.Columns>
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                    </DataGrid.Resources>
+                </DataGrid>
+            </GroupBox>
         </Grid>
         <Grid Grid.Row="2">
-            <GroupBox Header="Event log" Margin="10" Foreground="White" FontSize="14">
-                <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True"/>
+            <GroupBox Header="Event log" Margin="10" Foreground="White" FontSize="13" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <RichTextBox Name="eventLogConsole" Margin="0,5,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontSize="11"/>
             </GroupBox>
         </Grid>
         <Grid Grid.Row="3">

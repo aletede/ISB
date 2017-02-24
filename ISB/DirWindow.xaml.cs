@@ -35,7 +35,6 @@ namespace ISB
             {
                 if (Directory.Exists(dirPath))
                 {
-                    Properties.Settings.Default.directory = dirPath;
                     Properties.Settings.Default.newDir = dirPath;
                     Properties.Settings.Default.Save();
                     this.DialogResult = true;   // possible execption (System.InvalidOperationException)
