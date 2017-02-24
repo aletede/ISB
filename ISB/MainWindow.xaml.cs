@@ -26,6 +26,7 @@ namespace ISB
     public partial class MainWindow : Window
     {
         private ObservableCollection<DirectoryEntry> localEntries = new ObservableCollection<DirectoryEntry>();
+        private Monitoring bgWorker;
 
         public MainWindow()
         {
@@ -35,14 +36,38 @@ namespace ISB
                 bool? res = dirWin.ShowDialog();
                 if (res.HasValue)
                     if ((bool)res)
+                    {
+                        LoadNewSettings();
                         InitializeComponent();
+
+                    }
                     else
                         Application.Current.Shutdown();
                 else
                     Application.Current.Shutdown();
             }
-            else InitializeComponent();
-            this.Loaded += new RoutedEventHandler(LoadInitValueComponent); // approfondire concetto delegato loaded (IMPORTANTE!!!!!!!!)
+            else
+            {
+                LoadNewSettings();
+                InitializeComponent();
+            }
+            this.Loaded += new RoutedEventHandler(runBackgroundWorker);
+            this.Loaded += new RoutedEventHandler(LoadInitValue);
+        }
+
+        private void runBackgroundWorker(object sender, RoutedEventArgs e)
+        {
+            bgWorker = new Monitoring(this);
+            bgWorker.WorkerReportsProgress = true;
+            bgWorker.start();
+        }
+
+        private void LoadInitValue(object sender, RoutedEventArgs e)
+        {
+            pathTextBox.Text = Properties.Settings.Default.directory;
+            localDir.Tag = pathTextBox.Text;
+            localDir.ItemsSource = localEntries;
+            LoadLocalDataGrid(pathTextBox.Text);
         }
 
         private void LoadNewSettings()
@@ -53,47 +78,13 @@ namespace ISB
             Properties.Settings.Default.frequency = Properties.Settings.Default.newFreq;
         }
 
-        private void LoadInitValueComponent(object sender, RoutedEventArgs e)
-        {
-            LoadNewSettings();
-            pathTextBox.Text = Properties.Settings.Default.directory;
-            localDir.ItemsSource = localEntries;    // ObservableCollection
-            LoadLocalDataGrid(pathTextBox.Text);
-
-            // BackgroundWorker
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = true;
-            worker.DoWork += delegate(object s, DoWorkEventArgs args)
-            {
-                for (int x = 1; x <= 10; x++)
-                {
-                    System.Threading.Thread.Sleep(1000);
-                    worker.ReportProgress(0, new LogMessage("test "+x.ToString()+" log console from backgroundWorker", DateTime.Now));
-                }
-            };
-            worker.ProgressChanged += delegate(object s, ProgressChangedEventArgs args)
-            {
-                LogMessage lm2 = args.UserState as LogMessage;
-                eventLogConsole.AppendText(lm2.ToString());
-                eventLogConsole.ScrollToEnd();
-            };
-            worker.RunWorkerAsync();
-
-            // test logmessage e event log console
-            LogMessage lm = new LogMessage("prova logMessage class", DateTime.Now);
-            eventLogConsole.AppendText(lm.ToString());
-            lm.Message = "prova2 logMessage class";
-            lm.Time = DateTime.Now;
-            eventLogConsole.AppendText(lm.ToString());
-            eventLogConsole.ScrollToEnd();
-        }
-
         public void LoadLocalDataGrid(string localDirPath)
         {
-            // eccezioni non gestite, dimensione in bytes
+            // eccezioni non gestite benissimo (da rivedere), dimensione in bytes
+            int count = 2;
             try
             {
-                localEntries.Clear();    // se un eccezione viene lanciata dopo che le entries sono state cancellate, la UI sarà vuota
+                localEntries.Clear();
                 if (localDirPath != pathTextBox.Text)
                 {
                     DirectoryInfo di = new DirectoryInfo(localDirPath);
@@ -118,7 +109,14 @@ namespace ISB
             }
             catch (Exception err)
             {
-                // do something and write in a log file
+                // write error in a log file
+                eventLogConsole.AppendText(new LogMessage("Source: " + err.Source + " Msg: " + err.Message, DateTime.Now).ToString());
+                eventLogConsole.ScrollToEnd();
+                if (count != 0)
+                {
+                    count--;
+                    LoadLocalDataGrid(localDir.Tag.ToString());
+                }
             }
         }
 
@@ -131,9 +129,8 @@ namespace ISB
                     LoadLocalDataGrid(entry.Fullpath);
                 else
                 {
+                    MessageBox.Show("Impossibile accedere alla cartella selezionata.");
                     LoadLocalDataGrid(localDir.Tag.ToString()); // ricarica la UI nel caso in cui una cartella non esiste più
-                    eventLogConsole.AppendText(new LogMessage("La cartella " + entry.Name + " non esiste.", DateTime.Now).ToString());
-                    eventLogConsole.ScrollToEnd();
                 }
         }
 
