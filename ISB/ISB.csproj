@@ -55,13 +55,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DataFile.cs" />
+    <Compile Include="DirectoryStatus.cs" />
+    <Compile Include="Loading.cs" />
+    <Compile Include="Sync.cs" />
     <Compile Include="Monitoring.cs" />
-    <Compile Include="DirectoryEntry.cs" />
+    <Compile Include="LocalEntry.cs" />
     <Compile Include="DirWindow.xaml.cs">
       <DependentUpon>DirWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="LogMessage.cs" />
-    <Compile Include="Server.cs" />
+    <Compile Include="RemoteEntry.cs" />
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>

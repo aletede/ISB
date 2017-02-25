@@ -25,8 +25,7 @@ namespace ISB
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ObservableCollection<DirectoryEntry> localEntries = new ObservableCollection<DirectoryEntry>();
-        private Monitoring bgWorker;
+        private ObservableCollection<LocalEntry> localEntries = new ObservableCollection<LocalEntry>();
 
         public MainWindow()
         {
@@ -39,7 +38,6 @@ namespace ISB
                     {
                         LoadNewSettings();
                         InitializeComponent();
-
                     }
                     else
                         Application.Current.Shutdown();
@@ -51,31 +49,23 @@ namespace ISB
                 LoadNewSettings();
                 InitializeComponent();
             }
-            this.Loaded += new RoutedEventHandler(runBackgroundWorker);
-            this.Loaded += new RoutedEventHandler(LoadInitValue);
+            this.Loaded += new RoutedEventHandler(Initialization);
         }
-
-        private void runBackgroundWorker(object sender, RoutedEventArgs e)
-        {
-            bgWorker = new Monitoring(this);
-            bgWorker.WorkerReportsProgress = true;
-            bgWorker.start();
-        }
-
-        private void LoadInitValue(object sender, RoutedEventArgs e)
-        {
-            pathTextBox.Text = Properties.Settings.Default.directory;
-            localDir.Tag = pathTextBox.Text;
-            localDir.ItemsSource = localEntries;
-            LoadLocalDataGrid(pathTextBox.Text);
-        }
-
+        
         private void LoadNewSettings()
         {
             Properties.Settings.Default.directory = Properties.Settings.Default.newDir;
             Properties.Settings.Default.serverIP = Properties.Settings.Default.newIP;
             Properties.Settings.Default.serverPort = Properties.Settings.Default.newPort;
             Properties.Settings.Default.frequency = Properties.Settings.Default.newFreq;
+        }
+
+        private void Initialization(object sender, RoutedEventArgs e)
+        {
+            pathTextBox.Text = Properties.Settings.Default.directory;
+            localDir.Tag = pathTextBox.Text;
+            localDir.ItemsSource = localEntries;
+            LoadLocalDataGrid(pathTextBox.Text);
         }
 
         public void LoadLocalDataGrid(string localDirPath)
@@ -88,21 +78,21 @@ namespace ISB
                 if (localDirPath != pathTextBox.Text)
                 {
                     DirectoryInfo di = new DirectoryInfo(localDirPath);
-                    DirectoryEntry de = new DirectoryEntry("...", di.Parent.FullName, null, null, EntryType.Cartella, new Uri("pack://application:,,,/images/OpenFolder.png"));
+                    LocalEntry de = new LocalEntry("...", di.Parent.FullName, null, null, EntryType.Cartella, new Uri("pack://application:,,,/images/OpenFolder.png"));
                     localEntries.Add(de);
                 }
 
                 foreach (string d in Directory.GetDirectories(localDirPath))
                 {
                     DirectoryInfo di = new DirectoryInfo(d);
-                    DirectoryEntry de = new DirectoryEntry(di.Name, di.FullName, null, di.LastWriteTime.ToString(), EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
+                    LocalEntry de = new LocalEntry(di.Name, di.FullName, null, di.LastWriteTime.ToString(), EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
                     localEntries.Add(de);
 
                 }
                 foreach (string f in Directory.GetFiles(localDirPath))
                 {
                     FileInfo fi = new FileInfo(f);
-                    DirectoryEntry de = new DirectoryEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime.ToString(), EntryType.File, new Uri("pack://application:,,,/images/File.png"));
+                    LocalEntry de = new LocalEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime.ToString(), EntryType.File, new Uri("pack://application:,,,/images/File.png"));
                     localEntries.Add(de);
                 }
                 localDir.Tag = localDirPath;
@@ -123,7 +113,7 @@ namespace ISB
         private void Row_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             DataGridRow row = sender as DataGridRow;
-            DirectoryEntry entry = row.DataContext as DirectoryEntry;
+            LocalEntry entry = row.DataContext as LocalEntry;
             if (entry.Type == EntryType.Cartella)
                 if (Directory.Exists(entry.Fullpath))
                     LoadLocalDataGrid(entry.Fullpath);
