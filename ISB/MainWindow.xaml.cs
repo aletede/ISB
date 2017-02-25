@@ -65,10 +65,16 @@ namespace ISB
             pathTextBox.Text = Properties.Settings.Default.directory;
             localDir.Tag = pathTextBox.Text;
             localDir.ItemsSource = localEntries;
-            LoadLocalDataGrid(pathTextBox.Text);
+            LoadLocalData(pathTextBox.Text);
+            LoadRemoteData();
         }
 
-        public void LoadLocalDataGrid(string localDirPath)
+        public void LoadRemoteData()
+        {
+
+        }
+
+        public void LoadLocalData(string localDirPath)
         {
             // eccezioni non gestite benissimo (da rivedere), dimensione in bytes
             int count = 2;
@@ -105,7 +111,7 @@ namespace ISB
                 if (count != 0)
                 {
                     count--;
-                    LoadLocalDataGrid(localDir.Tag.ToString());
+                    LoadLocalData(localDir.Tag.ToString());
                 }
             }
         }
@@ -116,11 +122,11 @@ namespace ISB
             LocalEntry entry = row.DataContext as LocalEntry;
             if (entry.Type == EntryType.Cartella)
                 if (Directory.Exists(entry.Fullpath))
-                    LoadLocalDataGrid(entry.Fullpath);
+                    LoadLocalData(entry.Fullpath);
                 else
                 {
                     MessageBox.Show("Impossibile accedere alla cartella selezionata.");
-                    LoadLocalDataGrid(localDir.Tag.ToString()); // ricarica la UI nel caso in cui una cartella non esiste più
+                    LoadLocalData(localDir.Tag.ToString()); // ricarica la UI nel caso in cui una cartella non esiste più
                 }
         }
 
