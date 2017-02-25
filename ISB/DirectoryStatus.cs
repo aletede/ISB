@@ -10,7 +10,7 @@ namespace ISB
     {
         private Dictionary<string, DataFile> status = new Dictionary<string, DataFile>();
 
-        public void InsertData(DataFile df)
+        public void Insert(DataFile df)
         {
             this.status.Add(df.FullPath, df);
         }

@@ -57,7 +57,6 @@
     </ApplicationDefinition>
     <Compile Include="DataFile.cs" />
     <Compile Include="DirectoryStatus.cs" />
-    <Compile Include="Loading.cs" />
     <Compile Include="Sync.cs" />
     <Compile Include="Monitoring.cs" />
     <Compile Include="LocalEntry.cs" />
