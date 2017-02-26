@@ -62,6 +62,7 @@ namespace ISB
 
         private void Initialization(object sender, RoutedEventArgs e)
         {
+            // da rivedere
             pathTextBox.Text = Properties.Settings.Default.directory;
             localDir.Tag = pathTextBox.Text;
             localDir.ItemsSource = localEntries;
@@ -71,12 +72,13 @@ namespace ISB
 
         public void LoadRemoteData()
         {
-
+            // da rivedere
         }
 
         public void LoadLocalData(string localDirPath)
         {
-            // eccezioni non gestite benissimo (da rivedere), dimensione in bytes
+            // da rivedere
+            // eccezioni non gestite benissimo, dimensione in bytes
             int count = 2;
             try
             {

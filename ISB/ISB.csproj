@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Constants.cs" />
     <Compile Include="DataFile.cs" />
     <Compile Include="DirectoryStatus.cs" />
     <Compile Include="Sync.cs" />

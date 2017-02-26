@@ -9,9 +9,9 @@ namespace ISB
     class DataFile
     {
         private string _fullpath;
-        private byte[] _checksum;
+        private string _checksum;
 
-        public DataFile(string fullpath, byte[] checksum)
+        public DataFile(string fullpath, string checksum)
         {
             _fullpath = fullpath;
             _checksum = checksum;
@@ -23,7 +23,7 @@ namespace ISB
             set { _fullpath = value; }
         }
 
-        public byte[] Checksum
+        public string Checksum
         {
             get { return _checksum; }
             set { _checksum = value; }
