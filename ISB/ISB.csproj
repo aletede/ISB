@@ -58,6 +58,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DataFile.cs" />
     <Compile Include="DirectoryStatus.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="Sync.cs" />
     <Compile Include="Monitoring.cs" />
     <Compile Include="LocalEntry.cs" />

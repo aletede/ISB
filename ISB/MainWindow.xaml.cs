@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -25,7 +24,9 @@ namespace ISB
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ObservableCollection<LocalEntry> localEntries = new ObservableCollection<LocalEntry>();
+        private List<LocalEntry> localEntries = null;
+        private List<LocalEntry> remoteEntries = null;
+        //private BackgroundWorker _worker = new BackgroundWorker();
 
         public MainWindow()
         {
@@ -49,7 +50,7 @@ namespace ISB
                 LoadNewSettings();
                 InitializeComponent();
             }
-            this.Loaded += new RoutedEventHandler(Initialization);
+            this.Loaded += new RoutedEventHandler(StartApplication);
         }
         
         private void LoadNewSettings()
@@ -60,61 +61,84 @@ namespace ISB
             Properties.Settings.Default.frequency = Properties.Settings.Default.newFreq;
         }
 
-        private void Initialization(object sender, RoutedEventArgs e)
+        private void StartApplication(object sender, RoutedEventArgs e)
         {
-            // da rivedere
-            pathTextBox.Text = Properties.Settings.Default.directory;
-            localDir.Tag = pathTextBox.Text;
-            localDir.ItemsSource = localEntries;
-            LoadLocalData(pathTextBox.Text);
-            LoadRemoteData();
-        }
+            pathTextBox.Text = Properties.Settings.Default.directory;   // Directory path to be monitored
 
-        public void LoadRemoteData()
-        {
-            // da rivedere
-        }
+            // Local Data Grid initialization
+            localDir.Tag = pathTextBox.Text;    // Current directory displayed into Local Data Grid
+            LoadLocalData(pathTextBox.Text);    // Load entries into Data Grid
+
+            // initializing Remote Data Grid and starting monitoring
+            Client._worker.WorkerReportsProgress = true;
+            Client._worker.DoWork += delegate(object s, DoWorkEventArgs args)
+            {
+                Client.Connect();
+                while (true)
+                {
+                    Client.LoadRemoteData((string)args.Argument);
+                    System.Threading.Thread.Sleep(500);
+                }
+                //Monitoring.Start();
+            };
+            Client._worker.ProgressChanged += delegate(object s, ProgressChangedEventArgs args)
+            {
+                switch (args.ProgressPercentage)
+                {
+                    case 1:
+                        // Connect
+                        eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                        eventLogConsole.ScrollToEnd();
+                        break;
+                    case 2:
+                        // LoadRemoteData
+                        if (args.UserState == null)
+                            eventLogConsole.AppendText(new LogMessage("Exception raised on LoadRemoteData", DateTime.Now).ToString());
+                        else
+                            eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                        eventLogConsole.ScrollToEnd();
+                        break;
+                    default:
+                        break;
+                }
+            };
+            Client._worker.RunWorkerAsync(pathTextBox.Text);
+        }   
 
         public void LoadLocalData(string localDirPath)
         {
-            // da rivedere
-            // eccezioni non gestite benissimo, dimensione in bytes
-            int count = 2;
             try
             {
-                localEntries.Clear();
+                List<LocalEntry> UpdateLocalEntries = new List<LocalEntry>();                
                 if (localDirPath != pathTextBox.Text)
                 {
                     DirectoryInfo di = new DirectoryInfo(localDirPath);
                     LocalEntry de = new LocalEntry("...", di.Parent.FullName, null, null, EntryType.Cartella, new Uri("pack://application:,,,/images/OpenFolder.png"));
-                    localEntries.Add(de);
+                    UpdateLocalEntries.Add(de);
                 }
 
                 foreach (string d in Directory.GetDirectories(localDirPath))
                 {
                     DirectoryInfo di = new DirectoryInfo(d);
                     LocalEntry de = new LocalEntry(di.Name, di.FullName, null, di.LastWriteTime.ToString(), EntryType.Cartella, new Uri("pack://application:,,,/images/Folder.png"));
-                    localEntries.Add(de);
+                    UpdateLocalEntries.Add(de);
 
                 }
                 foreach (string f in Directory.GetFiles(localDirPath))
                 {
                     FileInfo fi = new FileInfo(f);
-                    LocalEntry de = new LocalEntry(fi.Name, fi.FullName, fi.Length.ToString(), fi.LastWriteTime.ToString(), EntryType.File, new Uri("pack://application:,,,/images/File.png"));
-                    localEntries.Add(de);
+                    LocalEntry de = new LocalEntry(fi.Name, fi.FullName, (fi.Length >> 10).ToString(), fi.LastWriteTime.ToString(), EntryType.File, new Uri("pack://application:,,,/images/File.png"));
+                    UpdateLocalEntries.Add(de);
                 }
-                localDir.Tag = localDirPath;
+                localDir.Tag = localDirPath;    // Update current directory of Local Data Grid
+                localEntries = UpdateLocalEntries;
+                localDir.ItemsSource = localEntries;    // Update source data for Local Data Grid
             }
             catch (Exception err)
             {
-                // write error in a log file
+                // rivedere gestione eccezioni e log file
                 eventLogConsole.AppendText(new LogMessage("Source: " + err.Source + " Msg: " + err.Message, DateTime.Now).ToString());
                 eventLogConsole.ScrollToEnd();
-                if (count != 0)
-                {
-                    count--;
-                    LoadLocalData(localDir.Tag.ToString());
-                }
             }
         }
 
