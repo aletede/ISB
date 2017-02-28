@@ -12,50 +12,61 @@ namespace ISB
 {
     static class Client
     {
+        public static Dictionary<string, string> _remoteStatus = new Dictionary<string, string>();  // da rivedere struttura e anche passaggio come argomento
+        public static List<LocalEntry> _remoteEntries = null;
         public static BackgroundWorker _worker = new BackgroundWorker();
         private static IPEndPoint _serverEndPoint = new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.serverIP), Properties.Settings.Default.serverPort);
-        private static TcpClient client;
+        private static TcpClient _client;
+
+        public static void Init(object s, DoWorkEventArgs args)
+        {
+            Connect();
+            //LoadRemoteData((string)args.Argument);
+            Monitoring.Start((string)args.Argument);
+        }
 
         public static void Connect()
         {
-            if (client!=null && client.Connected) return;
+            if (_client!=null && _client.Connected) return;
             // rivedere se inserire tutte le istruzioni seguenti in un blocco try-catch
-            client = new TcpClient();
+            _client = new TcpClient();
             do
             {
                 try
                 {
                     _worker.ReportProgress(1, "Trying to connect to the server...");
-                    client.Connect(_serverEndPoint);
-                    if (!client.Connected) System.Threading.Thread.Sleep(Constants.RECONNECT);
+                    _client.Connect(_serverEndPoint);
+                    if (!_client.Connected) System.Threading.Thread.Sleep(Constants.RECONNECT);
                 }
                 catch (Exception err)
                 {
                     // rivedere gestione eccezioni e log file
                 }
             }
-            while (!client.Connected);
+            while (!_client.Connected);
             _worker.ReportProgress(1, "Client connected to the server!");
         }
 
-        public static void LoadRemoteData(string remoteDirPath)
+        public static void LoadRemoteData(string localDirPath)
         {
-            string answer;
-            try
-            {
-                var stream = client.GetStream();
-                var writer = new BinaryWriter(stream);
-                var reader = new BinaryReader(stream);
-                writer.Write(100);
-                answer = reader.ReadString();
-                _worker.ReportProgress(2, answer);
-            }
-            catch (Exception err)
-            {
-                // rivedere gestione eccezioni e log file
-                _worker.ReportProgress(2, null);
-                Connect();
-            }
+
+        }
+
+        public static void LoadRemoteFiles(string localDirPath)
+        {
+            // Chiamare LoadRemoteData nel caso in cui per qualsiasi motivo non è stato chiamato con successo in precedenza
+        }
+
+        public static bool Sync(FileStream fs, string fullpath, string checksum)
+        {
+            bool TransactionCompleted = false;
+            return TransactionCompleted;
+        }
+
+        public static bool SyncDelete(string fullpath)
+        {
+            bool TransactionCompleted = false;
+            return TransactionCompleted;
         }
     }
 }

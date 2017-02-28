@@ -25,8 +25,6 @@ namespace ISB
     public partial class MainWindow : Window
     {
         private List<LocalEntry> localEntries = null;
-        private List<LocalEntry> remoteEntries = null;
-        //private BackgroundWorker _worker = new BackgroundWorker();
 
         public MainWindow()
         {
@@ -71,41 +69,39 @@ namespace ISB
 
             // initializing Remote Data Grid and starting monitoring
             Client._worker.WorkerReportsProgress = true;
-            Client._worker.DoWork += delegate(object s, DoWorkEventArgs args)
-            {
-                Client.Connect();
-                while (true)
-                {
-                    Client.LoadRemoteData((string)args.Argument);
-                    System.Threading.Thread.Sleep(500);
-                }
-                //Monitoring.Start();
-            };
-            Client._worker.ProgressChanged += delegate(object s, ProgressChangedEventArgs args)
-            {
-                switch (args.ProgressPercentage)
-                {
-                    case 1:
-                        // Connect
-                        eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
-                        eventLogConsole.ScrollToEnd();
-                        break;
-                    case 2:
-                        // LoadRemoteData
-                        if (args.UserState == null)
-                            eventLogConsole.AppendText(new LogMessage("Exception raised on LoadRemoteData", DateTime.Now).ToString());
-                        else
-                            eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
-                        eventLogConsole.ScrollToEnd();
-                        break;
-                    default:
-                        break;
-                }
-            };
+            Client._worker.DoWork += new DoWorkEventHandler(Client.Init);
+            Client._worker.ProgressChanged += new ProgressChangedEventHandler(ProgressResults);
             Client._worker.RunWorkerAsync(pathTextBox.Text);
-        }   
+        }
 
-        public void LoadLocalData(string localDirPath)
+        private void ProgressResults(object s, ProgressChangedEventArgs args)
+        {
+            switch (args.ProgressPercentage)
+            {
+                case 1:
+                    // Connect
+                    eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                    eventLogConsole.ScrollToEnd();
+                    break;
+                case 2:
+                    // LoadRemoteData
+                    if (args.UserState == null)
+                        eventLogConsole.AppendText(new LogMessage("Exception raised on LoadRemoteData", DateTime.Now).ToString());
+                    else
+                        eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                    eventLogConsole.ScrollToEnd();
+                    break;
+                case 3:
+                    // file removed/uploaded 
+                    eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                    eventLogConsole.ScrollToEnd();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void LoadLocalData(string localDirPath)
         {
             try
             {
