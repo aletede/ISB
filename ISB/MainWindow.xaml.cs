@@ -57,6 +57,7 @@ namespace ISB
             Properties.Settings.Default.serverIP = Properties.Settings.Default.newIP;
             Properties.Settings.Default.serverPort = Properties.Settings.Default.newPort;
             Properties.Settings.Default.frequency = Properties.Settings.Default.newFreq;
+            Properties.Settings.Default.Save();
         }
 
         private void StartApplication(object sender, RoutedEventArgs e)
@@ -76,6 +77,7 @@ namespace ISB
 
         private void ProgressResults(object s, ProgressChangedEventArgs args)
         {
+            // da rivedere
             switch (args.ProgressPercentage)
             {
                 case 1:

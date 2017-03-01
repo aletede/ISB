@@ -17,6 +17,8 @@ namespace ISB
         public static BackgroundWorker _worker = new BackgroundWorker();
         private static IPEndPoint _serverEndPoint = new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.serverIP), Properties.Settings.Default.serverPort);
         private static TcpClient _client;
+        private static BinaryReader _reader;
+        private static BinaryWriter _writer;
 
         public static void Init(object s, DoWorkEventArgs args)
         {
@@ -45,21 +47,71 @@ namespace ISB
             }
             while (!_client.Connected);
             _worker.ReportProgress(1, "Client connected to the server!");
+            InitStreams();
+        }
+
+        private static void InitStreams()
+        {
+            try
+            {
+                NetworkStream _stream = _client.GetStream();
+                _stream.ReadTimeout = Constants.READTIMEOUT;
+                _stream.WriteTimeout = Constants.WRITETIMEOUT;
+                _reader = new BinaryReader(_stream);
+                _writer = new BinaryWriter(_stream);
+            }
+            catch (Exception err)
+            {
+                // rivedere gestione eccezioni e log file
+            }
         }
 
         public static void LoadRemoteData(string localDirPath)
         {
-
+            // scope: receiving all backup filenames in the server
         }
 
         public static void LoadRemoteFiles(string localDirPath)
         {
             // Chiamare LoadRemoteData nel caso in cui per qualsiasi motivo non è stato chiamato con successo in precedenza
+            // scope: receiving last directory status stored on the server
         }
 
-        public static bool Sync(FileStream fs, string fullpath, string checksum)
+        public static bool SyncFile(FileStream fs, string fullpath, string checksum, string localDirPath)
         {
             bool TransactionCompleted = false;
+            try
+            {
+                Int32 serverAnswer;
+                // notify server about SyncFile
+                _writer.Write(Constants.SYNCFILE);
+                serverAnswer = _reader.ReadInt32(); // wait for server answer
+                if (serverAnswer == Constants.INIT)
+                {
+                    // for some reasons, server init has not been done before
+                    LoadRemoteData(localDirPath);
+                    serverAnswer = _reader.ReadInt32();
+                }
+                if (serverAnswer == Constants.SRVREADY)
+                {
+                    // send to server path of the file
+                    _writer.Write(fullpath);
+                    // send to server checksum of the file
+                    _writer.Write(checksum);
+                    // send file content
+                   // _writer.Write(fs.Length);
+                    byte[] buffer = new byte[Constants.BUFFSIZE];
+                    while (fs.Read(buffer, 0, Constants.BUFFSIZE) > 0)
+                        _writer.Write(buffer);
+                    serverAnswer = _reader.ReadInt32();   // wait for server answer
+                    if (serverAnswer == Constants.POS_ANS)
+                        TransactionCompleted = true;
+                }
+            }
+            catch (Exception err)
+            {
+                // rivedere gestione eccezioni e log file
+            }
             return TransactionCompleted;
         }
 
