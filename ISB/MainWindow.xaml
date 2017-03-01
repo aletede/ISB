@@ -64,6 +64,7 @@
                 <DataGrid Name="remoteDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nome" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
                         <DataGridTextColumn Header="Ultima Modifica" Binding="{Binding Date}" TextBlock.TextAlignment="Right">
                         </DataGridTextColumn>
                     </DataGrid.Columns>

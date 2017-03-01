@@ -81,16 +81,19 @@ namespace ISB
             switch (args.ProgressPercentage)
             {
                 case 1:
-                    // Connect
+                    // Connect (print string)
                     eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
                     eventLogConsole.ScrollToEnd();
                     break;
                 case 2:
-                    // LoadRemoteData
-                    if (args.UserState == null)
-                        eventLogConsole.AppendText(new LogMessage("Exception raised on LoadRemoteData", DateTime.Now).ToString());
+                    // LoadBackupData
+                    if (!(bool)args.UserState)
+                        eventLogConsole.AppendText(new LogMessage("Exception raised on LoadBackupData", DateTime.Now).ToString());
                     else
-                        eventLogConsole.AppendText(new LogMessage((string)args.UserState, DateTime.Now).ToString());
+                    {
+                        remoteDir.ItemsSource = Client._remoteEntries;
+                        eventLogConsole.AppendText(new LogMessage("LoadBackupData done", DateTime.Now).ToString());
+                    }
                     eventLogConsole.ScrollToEnd();
                     break;
                 case 3:
