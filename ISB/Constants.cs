@@ -20,6 +20,7 @@ namespace ISB
         public const int SYNCFILE = 5;
         public const int RESTOREDIR = 6;
         public const int RCVDATAFILE = 7;
-
+        public const int SYNCDELETE = 8;
+        public const int SYNCDELETE = 8;
     }
 }

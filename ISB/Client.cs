@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ISB
@@ -15,11 +16,12 @@ namespace ISB
         public static Dictionary<string, string> _remoteStatus = null;  // da rivedere struttura e anche passaggio come argomento
         public static List<RemoteEntry> _remoteEntries = null;
         public static BackgroundWorker _worker = new BackgroundWorker();
+        public static ManualResetEvent _mre = new ManualResetEvent(false);
         private static IPEndPoint _serverEndPoint = new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.serverIP), Properties.Settings.Default.serverPort);
         private static TcpClient _client;
         private static BinaryReader _reader;
         private static BinaryWriter _writer;
-        private static string _dirPath;
+        public static string _dirPath;
 
         public static void Init(object s, DoWorkEventArgs args)
         {
@@ -92,7 +94,7 @@ namespace ISB
                 {
                     string _id = _reader.ReadString();
                     string _date = _reader.ReadString();
-                    _temp.Add(new RemoteEntry(_dirPath, _date, _id));
+                    _temp.Add(new RemoteEntry(_date, _id));
                 }
                 _remoteEntries = _temp;
                 _worker.ReportProgress(2, true);    // rivedere
@@ -147,6 +149,7 @@ namespace ISB
                     // send to server checksum of the file
                     _writer.Write(checksum);
                     // send file content
+                    _writer.Write(fs.Length);
                     fs.CopyTo(_writer.BaseStream);  // da rivedere!!!!!!
                     serverAnswer = _reader.ReadInt32();   // wait for server answer
                     if (serverAnswer == Constants.POS_ANS)
@@ -163,7 +166,68 @@ namespace ISB
         public static bool SyncDelete(string fullpath)
         {
             bool TransactionCompleted = false;
+            try
+            {
+                Int32 serverAnswer;
+                _writer.Write(Constants.SYNCDELETE);
+                while ((serverAnswer = _reader.ReadInt32()) == Constants.INIT)
+                    InitServer();
+                if (serverAnswer == Constants.SRVREADY)
+                    _writer.Write(fullpath);
+                serverAnswer = _reader.ReadInt32();
+                if (serverAnswer == Constants.POS_ANS)
+                    TransactionCompleted = true;
+            }
+            catch (Exception err)
+            {
+                // rivedere gestione eccezioni e log file
+            }
             return TransactionCompleted;
+        }
+
+        public static Dictionary<string, string> LoadBackupFolder(string folderID)
+        {
+            Dictionary<string, string> _temp = null;
+            try
+            {
+                Int32 answer;
+                _temp = new Dictionary<string, string>();
+                _writer.Write(Constants.RESTOREDIR);
+                _writer.Write(folderID);
+                while ((answer = _reader.ReadInt32()) == Constants.INIT)
+                    InitServer();
+                for (Int32 i = 0; i < answer; i++)
+                {
+                    string _path = _reader.ReadString();
+                    string _checksum = _reader.ReadString();
+                    _temp.Add(_path, _checksum);
+                }
+                Restoring._worker.ReportProgress(1, "LoadBackupFolder done!");
+            }
+            catch (Exception err)
+            {
+                // rivedere gestione eccezioni e log file
+                // catch eccezioni initServer???
+            }
+            return _temp;
+        }
+
+        public static void RestoreFile(string fullpath, string tempfullpath)
+        {
+            Int64 filesize = _reader.ReadInt64();
+            using (FileStream _fs = File.OpenWrite(tempfullpath))
+            {
+                int _buffersize;
+                while (filesize > 0)
+                {
+                    _buffersize = Constants.BUFFSIZE;
+                    if (filesize < Constants.BUFFSIZE) _buffersize = (int)filesize;
+                    byte[] _buffer = new byte[_buffersize];
+                    int size = _reader.BaseStream.Read(_buffer, 0, _buffersize);
+                    _fs.Write(_buffer, 0, size);
+                    filesize -= size;
+                }
+            }
         }
     }
 }

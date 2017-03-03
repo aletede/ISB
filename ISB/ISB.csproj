@@ -65,6 +65,7 @@
       <DependentUpon>DirWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="LogMessage.cs" />
+    <Compile Include="Restoring.cs" />
     <Compile Include="SettingWindow.xaml.cs">
       <DependentUpon>SettingWindow.xaml</DependentUpon>
     </Compile>

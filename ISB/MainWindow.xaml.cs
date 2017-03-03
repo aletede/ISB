@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -24,7 +25,7 @@ namespace ISB
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<LocalEntry> localEntries = null;
+        private List<LocalEntry> localEntries = null; 
 
         public MainWindow()
         {
@@ -68,11 +69,25 @@ namespace ISB
             localDir.Tag = pathTextBox.Text;    // Current directory displayed into Local Data Grid
             LoadLocalData(pathTextBox.Text);    // Load entries into Data Grid
 
+            // initializing restoring 
+            Restoring._worker.WorkerReportsProgress = true;
+            Restoring._worker.DoWork += new DoWorkEventHandler(Restoring.Start);
+            Restoring._worker.ProgressChanged += new ProgressChangedEventHandler(ProgressResults);
+            Restoring._worker.RunWorkerCompleted += delegate(object s, RunWorkerCompletedEventArgs args)
+            {
+                // aggiorna remote data e fai qualunque altra cosa e poi chiama _mre.set()
+                string result = ((bool)args.Result) ? "Restoring end with success. Monitoring is resumed." : "Restoring failed. Monitoring is resumed.";
+                eventLogConsole.AppendText(new LogMessage(result, DateTime.Now).ToString());  // modificare success/fail in base al valore di ritorno
+                eventLogConsole.ScrollToEnd();
+                Client._mre.Set();
+            };
+
             // initializing Remote Data Grid and starting monitoring
             Client._worker.WorkerReportsProgress = true;
             Client._worker.DoWork += new DoWorkEventHandler(Client.Init);
             Client._worker.ProgressChanged += new ProgressChangedEventHandler(ProgressResults);
             Client._worker.RunWorkerAsync(pathTextBox.Text);
+            Client._mre.Set();
         }
 
         private void ProgressResults(object s, ProgressChangedEventArgs args)
@@ -133,7 +148,7 @@ namespace ISB
                 }
                 localDir.Tag = localDirPath;    // Update current directory of Local Data Grid
                 localEntries = UpdateLocalEntries;
-                localDir.ItemsSource = localEntries;    // Update source data for Local Data Grid
+                localDir.ItemsSource = localEntries;
             }
             catch (Exception err)
             {
@@ -164,6 +179,34 @@ namespace ISB
             if (res.HasValue)
                 if ((bool)res)
                     MessageBox.Show("I nuovi parametri saranno applicati al riavvio dell'applicazione.");
+        }
+
+        private void Restore_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Restoring._worker.IsBusy)
+            {
+                Client._mre.Reset();
+                Restoring._worker.RunWorkerAsync(restoreButton.Tag.ToString());
+            }
+            restoreButton.IsEnabled = false;
+        }
+
+        private void Row_Selected(object sender, RoutedEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            RemoteEntry entry = row.DataContext as RemoteEntry;
+            restoreButton.Tag = entry.ID;
+            restoreButton.IsEnabled = true;
+        }
+
+        private void remoteDir_LostFocus(object sender, RoutedEventArgs e)
+        {
+            remoteDir.SelectedItem = null;
+        }
+
+        private void localDir_LostFocus(object sender, RoutedEventArgs e)
+        {
+            localDir.SelectedItem = null;
         }
     }
 }

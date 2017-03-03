@@ -21,6 +21,7 @@
                 <TextBlock Text="Percorso cartella" Foreground="White" Margin="10,5,10,10" FontSize="12" VerticalAlignment="Center"/>
                 <TextBox Name="pathTextBox" Width="250" Margin="0,5,10,10" IsReadOnly="True" FontSize="12" VerticalAlignment="Center"/>
                 <Button Content="Impostazioni" Click="Settings_Click" Margin="10,5,10,10" FontSize="12"/>
+                <Button Name="restoreButton" Content="Ripristina" Click="Restore_Click" Margin="10,5,10,10" FontSize="12" IsEnabled="False"/>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" Margin="0">
@@ -30,7 +31,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0" Header="Computer Locale" Margin="10" Foreground="White" FontSize="13">
-                <DataGrid Name="localDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White">
+                <DataGrid Name="localDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White" LostFocus="localDir_LostFocus">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Nome">
                             <DataGridTemplateColumn.CellTemplate>
@@ -61,10 +62,9 @@
             <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FFA0A0A0"/>
 
             <GroupBox Grid.Column="2" Header="Server Remoto" Margin="10" Foreground="White" FontSize="13">
-                <DataGrid Name="remoteDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White">
+                <DataGrid Name="remoteDir" AutoGenerateColumns="False" Margin="0,5,0,0" GridLinesVisibility="None" IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="True" CanUserResizeRows="False" HeadersVisibility="Column" FontSize="11" Background="White" SelectionMode="Single" LostFocus="remoteDir_LostFocus">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nome" Binding="{Binding Name}"/>
-                        <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
+                        <DataGridTextColumn Header="ID" Binding="{Binding ID}" CanUserSort="False"/>
                         <DataGridTextColumn Header="Ultima Modifica" Binding="{Binding Date}" TextBlock.TextAlignment="Right">
                         </DataGridTextColumn>
                     </DataGrid.Columns>
@@ -72,6 +72,9 @@
                         <Style TargetType="DataGridCell">
                             <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="Selected" Handler="Row_Selected"/>
                         </Style>
                     </DataGrid.Resources>
                 </DataGrid>
